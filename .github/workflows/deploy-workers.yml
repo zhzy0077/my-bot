@@ -28,7 +28,7 @@ jobs:
       env:
         WX_APPID: ${{ secrets.WX_APPID }}
         WX_APPSECRET: ${{ secrets.WX_APPSECRET }}
-      run: envsubst < src/secrets.ts >  src/secrets.ts
+      run: envsubst < src/secrets.ts | tee src/serets.ts
       
     - name: Wrangler publish
       run: wrangler publish
