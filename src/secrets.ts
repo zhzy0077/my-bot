@@ -1,4 +1,4 @@
 export class Secrets {
-    public readonly WX_APPID: string = "${WX_APPID}";
-    public readonly WX_APPSECRET: string = "${WX_APPSECRET}";
+    public static readonly WX_APPID: string = "${WX_APPID}";
+    public static readonly WX_APPSECRET: string = "${WX_APPSECRET}";
 }
