@@ -1,9 +1,14 @@
 import { Secrets } from "./secrets";
 
 export async function handleRequest(request: Request): Promise<Response> {
-  const accessToken = await fetchAccessToken();
-  const success = await sendMessage(await request.text(), accessToken);
-  return new Response(success.toString());
+  try {
+    const accessToken = await fetchAccessToken();
+    const success = await sendMessage(await request.text(), accessToken);
+    return new Response(success.toString());
+  } catch (err) {
+    // Return the error stack as the response
+    return new Response(err.stack || err)
+  }
 }
 
 async function fetchAccessToken(): Promise<string> {
