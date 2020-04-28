@@ -1,0 +1,7 @@
+name = "my-bot"
+type = "webpack"
+account_id = "110f94b19452cac7b1ec132591b9fe69"
+workers_dev = true
+route = ""
+zone_id = ""
+webpack_config = "webpack.config.js"
