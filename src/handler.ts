@@ -3,8 +3,8 @@ import { Secrets } from "./secrets";
 export async function handleRequest(request: Request): Promise<Response> {
   try {
     const accessToken = await fetchAccessToken();
-    const success = await sendMessage(await request.text(), accessToken);
-    return new Response(success.toString());
+    const result = await sendMessage(await request.text(), accessToken);
+    return new Response(JSON.stringify(result));
   } catch (err) {
     // Return the error stack as the response
     return new Response(err.stack || err)
@@ -17,7 +17,7 @@ async function fetchAccessToken(): Promise<string> {
   return (await result.json())["access_token"];
 }
 
-async function sendMessage(message: string, accessToken: string): Promise<boolean> {
+async function sendMessage(message: string, accessToken: string): Promise<any> {
   const url = `https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${accessToken}`;
   const response = await fetch(url, {
     method: "POST",
@@ -33,5 +33,5 @@ async function sendMessage(message: string, accessToken: string): Promise<boolea
       }
     })
   });
-  return (await response.json())["errcode"] === 0;
+  return await response.json();
 }
