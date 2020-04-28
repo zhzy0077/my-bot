@@ -22,7 +22,7 @@ jobs:
       env:
         CF_SECRET: ${{ secrets.CF_SECRET }}
       run: |
-        echo '%CF_SECRET%' | wrangler config
+        echo '${CF_SECRET}' | wrangler config
         
     - name: Secret replacement
       env:
