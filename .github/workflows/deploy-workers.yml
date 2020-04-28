@@ -1,0 +1,34 @@
+name: CD
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+
+    - name: Install wrangler
+      run: npm i @cloudflare/wrangler -g
+      
+    - name: Configure wrangler
+      env:
+        CF_SECRET: ${{ secrets.CF_SECRET }}
+      run: |
+        echo '%CF_SECRET%' | wrangler config
+        
+    - name: Secret replacement
+      env:
+        WX_APPID: ${{ secrets.WX_APPID }}
+        WX_APPSECRET: ${{ secrets.WX_APPSECRET }}
+      run: envsubst < src/secrets.ts >  src/secrets.ts
+      
+    - name: Wrangler publish
+      run: wrangler publish
