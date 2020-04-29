@@ -29,7 +29,7 @@ jobs:
         WX_APPID: ${{ secrets.WX_APPID }}
         WX_APPSECRET: ${{ secrets.WX_APPSECRET }}
         GIST_TOKEN: ${{ GIST_TOKEN }}
-        GIST_ID: ${{ GIST_ID }}
+        GIST_ID: ${{ GIST_ID }} 
       run: |
         envsubst < src/secrets.ts > src/secrets_replaced.ts
         mv src/secrets_replaced.ts src/secrets.ts
