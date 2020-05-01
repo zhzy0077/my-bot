@@ -1,4 +1,4 @@
-name: CD
+name: Deployment
 
 on:
   push:
@@ -29,7 +29,9 @@ jobs:
         WX_APPID: ${{ secrets.WX_APPID }}
         WX_APPSECRET: ${{ secrets.WX_APPSECRET }}
         GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
-        GIST_ID: ${{ secrets.GIST_ID }} 
+        GIST_ID: ${{ secrets.GIST_ID }}
+        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
       run: |
         envsubst < src/secrets.ts > src/secrets_replaced.ts
         mv src/secrets_replaced.ts src/secrets.ts

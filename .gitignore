@@ -4,3 +4,4 @@ transpiled
 worker
 *.log
 .prettierrc
+.idea/**

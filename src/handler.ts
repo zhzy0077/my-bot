@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import { Secrets } from "./secrets";
+import { createTransport } from 'nodemailer'
 
 const HEADERS: HeadersInit = {
   "Content-Type": "application/json",
@@ -13,12 +14,14 @@ const octokit = new Octokit({
 const AccessTokenFile = "access_token";
 
 export async function handleRequest(request: Request): Promise<Response> {
+  const message = await request.text();
   try {
     const accessToken = await getAccessToken();
-    const result = await sendMessage(await request.text(), accessToken);
-    await log(JSON.stringify(result));
+    const result = await sendMessage(message, accessToken);
+    await log(`Request {${JSON.stringify(request)}} Response: {${JSON.stringify(result)}}`);
     return new Response(JSON.stringify(result));
   } catch (err) {
+    await sendEmail(`Fallback message from bot: ${JSON.stringify(err)}.`, message);
     await log(JSON.stringify(err));
     return new Response(err.stack || err)
   }
@@ -57,6 +60,25 @@ async function log(log: string): Promise<void> {
   await octokit.gists.createComment({
     gist_id: Secrets.GIST_ID,
     body: log,
+  });
+}
+
+async function sendEmail(title: string, message: string): Promise<void> {
+  const transport = createTransport({
+    host : "smtp.aliyun.com",
+    port: 465,
+    secure: true,
+    auth : {
+      user : Secrets.EMAIL_ADDRESS,
+      pass : Secrets.EMAIL_PASSWORD,
+    },
+  });
+
+  await transport.sendMail({
+    from: Secrets.EMAIL_ADDRESS,
+    to: Secrets.EMAIL_ADDRESS,
+    subject: title,
+    text: message,
   });
 }
 

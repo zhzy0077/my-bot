@@ -16,10 +16,12 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^1.0.1",
     "@octokit/rest": "^17.6.0",
+    "@types/nodemailer": "^6.4.0",
     "@types/chai": "^4.2.11",
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
     "mocha": "^6.1.4",
+    "nodemailer": "^6.4.6",
     "prettier": "^1.18.2",
     "rimraf": "^3.0.2",
     "service-worker-mock": "^2.0.3",
