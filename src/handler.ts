@@ -18,7 +18,7 @@ export async function handleRequest (request: Request): Promise<Response> {
   const context = await getContext()
   try {
     const result = await sendMessage(message, context)
-    await log(`Request {${JSON.stringify(request)}} Response: {${JSON.stringify(result)}}`, context)
+    await log(`Message: {${message} Response: {${JSON.stringify(result)}}`, context)
     return new Response(JSON.stringify(result))
   } catch (err) {
     const errorMsg = JSON.stringify(err)
@@ -95,7 +95,7 @@ async function fetchAccessTokenFromOrigin (): Promise<WeChatAccessToken> {
 }
 
 async function sendMessage (message: string, context: Context): Promise<WeChatSendMessageReply> {
-  var accessToken = context.weChatAccessToken.access_token
+  const accessToken = context.weChatAccessToken.access_token
   const url = `https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${accessToken}`
   const wxMessage: WeChatMessage = {
     touser: toUser,
