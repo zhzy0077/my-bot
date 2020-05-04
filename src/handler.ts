@@ -44,10 +44,13 @@ async function readContext (): Promise<Context> {
     gist_id: Secrets.GIST_ID,
   })
   const accessToken = (data.files as any)[AccessTokenFile]
-  const logUrl = (data.files as any)[today()]
+  let logUrl;
+  if ((data.files as any)[today()]) {
+    logUrl = (data.files as any)[today()].raw_url
+  }
   return <Context>{
     weChatAccessToken: JSON.parse(accessToken.content) as WeChatAccessToken,
-    logUrl: logUrl?.raw_url as string,
+    logUrl: logUrl,
   }
 }
 
