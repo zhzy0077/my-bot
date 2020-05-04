@@ -13,10 +13,18 @@ const AccessTokenFile = 'access_token'
 const FallbackEvent = 'fallback'
 const toUser = 'org6fvzbNIm5TlJTCShbKFyd59UA'
 
+const blockList: string[] = [
+  '【芽芽的窝】',
+]
+
 export async function handleRequest (request: Request): Promise<Response> {
   const message = await request.text()
   const context = await getContext()
   try {
+    if (!precheckMessage(message, context)) {
+      await log(`Message: {${message}. Blocked.`, context)
+      return new Response()
+    }
     const result = await sendMessage(message, context)
     await log(`Message: {${message} Response: {${JSON.stringify(result)}}`, context)
     return new Response(JSON.stringify(result))
@@ -92,6 +100,16 @@ async function fetchAccessTokenFromOrigin (): Promise<WeChatAccessToken> {
   const result = await fetchTyped<WeChatAccessToken>(url)
   result.expires_at = now() + result.expires_in
   return result
+}
+
+function precheckMessage (message: string, context: Context): boolean {
+  for (let word of blockList) {
+    if (message.indexOf(word) !== -1) {
+      return false
+    }
+  }
+
+  return true
 }
 
 async function sendMessage (message: string, context: Context): Promise<WeChatSendMessageReply> {
