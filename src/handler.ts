@@ -123,7 +123,7 @@ function precheckMessage (message: string, context: Context): boolean {
 
   // Step 2: check duplicate.
   const latest = context.log[context.log.length - 1]
-  if (now() - latest.timestamp < 3 && message === latest.message) {
+  if (now() - latest.timestamp < 60 && message === latest.message) {
     return false;
   }
 
