@@ -15,25 +15,35 @@ const toUser = 'org6fvzbNIm5TlJTCShbKFyd59UA'
 
 const blockList: string[] = [
   '【芽芽的窝】',
+  '【欧莱雅男士】',
+  '【自如网】',
 ]
 
 export async function handleRequest (request: Request): Promise<Response> {
   const message = await request.text()
   const context = await getContext()
+  let messageLog: MessageLog = <MessageLog> {
+    timestamp: now(),
+    message: message,
+  }
   try {
     if (!precheckMessage(message, context)) {
-      await log(`Message: {${message}. Blocked.`, context)
+      messageLog.status = MessageStatus.BLOCKED
       return new Response()
     }
     const result = await sendMessage(message, context)
-    await log(`Message: {${message} Response: {${JSON.stringify(result)}}`, context)
+    messageLog.status = MessageStatus.POSTED
+    messageLog.resultMsg = JSON.stringify(result);
     return new Response(JSON.stringify(result))
   } catch (err) {
     const errorMsg = JSON.stringify(err)
     await fallback(errorMsg, message)
-    await log(errorMsg, context)
+
+    messageLog.resultMsg = errorMsg
+    messageLog.status = MessageStatus.FALLBACK
     return new Response(errorMsg)
   } finally {
+    log(messageLog, context)
     await saveContext(context)
   }
 }
@@ -53,9 +63,13 @@ async function readContext (): Promise<Context> {
   })
   const accessToken = (data.files as any)[AccessTokenFile]
   const logUrl = (data.files as any)[today()]
+  let logContent
+  if (logUrl?.raw_url) {
+    logContent = await fetchTyped<MessageLog[]>(logUrl?.raw_url)
+  }
   return <Context>{
     weChatAccessToken: JSON.parse(accessToken.content) as WeChatAccessToken,
-    logUrl: logUrl?.raw_url as string,
+    log: logContent,
   }
 }
 
@@ -73,11 +87,6 @@ async function fallback (errMsg: string, message: string): Promise<void> {
 }
 
 async function saveContext (context: Context): Promise<void> {
-  let logContent = context.newLog
-  if (context.logUrl) {
-    logContent = await (await fetch(context.logUrl)).text() + logContent
-  }
-
   await octokit.gists.update({
     gist_id: Secrets.GIST_ID,
     files: {
@@ -85,14 +94,14 @@ async function saveContext (context: Context): Promise<void> {
         content: JSON.stringify(context.weChatAccessToken),
       },
       [today()]: {
-        content: logContent,
+        content: JSON.stringify(context.log),
       }
     } as any
   })
 }
 
-async function log (log: string, context: Context): Promise<void> {
-  context.newLog += `${log}\n`
+function log (log: MessageLog, context: Context): void {
+  context.log.push(log)
 }
 
 async function fetchAccessTokenFromOrigin (): Promise<WeChatAccessToken> {
@@ -103,10 +112,17 @@ async function fetchAccessTokenFromOrigin (): Promise<WeChatAccessToken> {
 }
 
 function precheckMessage (message: string, context: Context): boolean {
+  // Step 1: check block list.
   for (let word of blockList) {
     if (message.indexOf(word) !== -1) {
       return false
     }
+  }
+
+  // Step 2: check duplicate.
+  const latest = context.log[context.log.length - 1]
+  if (now() - latest.timestamp < 3 && message === latest.message) {
+    return false;
   }
 
   return true
@@ -123,11 +139,15 @@ async function sendMessage (message: string, context: Context): Promise<WeChatSe
         content: message,
       },
   }
-  return await fetchTyped<WeChatSendMessageReply>(url, {
+  const result = await fetchTyped<WeChatSendMessageReply>(url, {
     method: 'POST',
     headers: HEADERS,
     body: JSON.stringify(wxMessage)
   })
+  if (result.errcode !== 0) {
+    throw result;
+  }
+  return result;
 }
 
 async function fetchTyped<T> (input: RequestInfo, init?: RequestInit): Promise<T> {
@@ -136,7 +156,7 @@ async function fetchTyped<T> (input: RequestInfo, init?: RequestInit): Promise<T
 }
 
 function now (): number {
-  return new Date().getTime() / 1000
+  return Math.round(new Date().getTime() / 1000)
 }
 
 function today (): string {
@@ -145,8 +165,7 @@ function today (): string {
 
 interface Context {
   weChatAccessToken: WeChatAccessToken,
-  logUrl: string,
-  newLog: string,
+  log: MessageLog[],
 }
 
 interface WeChatAccessToken {
@@ -168,3 +187,15 @@ interface WeChatSendMessageReply {
   errmsg: string,
 }
 
+interface MessageLog {
+  message: string,
+  timestamp: number,
+  status: MessageStatus,
+  resultMsg: string,
+}
+
+enum MessageStatus {
+  POSTED,
+  BLOCKED,
+  FALLBACK,
+}
