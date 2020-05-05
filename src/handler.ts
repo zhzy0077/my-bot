@@ -20,6 +20,9 @@ const blockList: string[] = [
 ]
 
 export async function handleRequest (request: Request): Promise<Response> {
+  if (request.method !== 'POST') {
+    return new Response("Alive")
+  }
   const message = await request.text()
   const context = await getContext()
   let messageLog: MessageLog = <MessageLog> {
@@ -29,23 +32,22 @@ export async function handleRequest (request: Request): Promise<Response> {
   try {
     if (!precheckMessage(message, context)) {
       messageLog.status = MessageStatus.BLOCKED
-      return new Response()
+      return new Response(JSON.stringify(messageLog))
     }
     const result = await sendMessage(message, context)
     messageLog.status = MessageStatus.POSTED
     messageLog.resultMsg = JSON.stringify(result);
-    return new Response(JSON.stringify(result))
   } catch (err) {
     const errorMsg = JSON.stringify(err)
     await fallback(errorMsg, message)
 
     messageLog.resultMsg = errorMsg
     messageLog.status = MessageStatus.FALLBACK
-    return new Response(errorMsg)
   } finally {
     log(messageLog, context)
     await saveContext(context)
   }
+  return new Response(JSON.stringify(messageLog))
 }
 
 async function getContext (): Promise<Context> {
