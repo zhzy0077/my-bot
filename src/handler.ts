@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import { Secrets } from "./secrets";
+import { escape } from "./markdown-escape";
 
 const HEADERS: HeadersInit = {
   "Content-Type": "application/json"
@@ -200,7 +201,8 @@ async function sendTelegramMessage(
   const url = `https://api.telegram.org/bot${Secrets.TELEGRAM_AUTHENTICATION_TOKEN}/sendMessage`;
   const tgMessage: TelegramMessage = {
     chat_id: chatId,
-    text: `${title}\n${message}`
+    text: `*${escape(title)}*\n${escape(message)}`,
+    parse_mode: "MarkdownV2"
   };
   const result = await fetchTyped<TelegramSendMessageReply>(url, {
     method: "POST",
