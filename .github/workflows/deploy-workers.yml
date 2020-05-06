@@ -31,6 +31,7 @@ jobs:
         GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
         GIST_ID: ${{ secrets.GIST_ID }}
         IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
+        TELEGRAM_AUTHENTICATION_TOKEN: ${{ secrets.TELEGRAM_AUTHENTICATION_TOKEN }}
       run: |
         envsubst < src/secrets.ts > src/secrets_replaced.ts
         mv src/secrets_replaced.ts src/secrets.ts
