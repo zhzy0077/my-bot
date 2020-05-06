@@ -1,7 +1,7 @@
 {
-  "name": "pname",
+  "name": "my-bot",
   "version": "1.0.0",
-  "description": "Cloudflare worker TypeScript template",
+  "description": "My Notification Bot",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
@@ -20,7 +20,7 @@
     "@types/mocha": "^5.2.7",
     "@types/nodemailer": "^6.4.0",
     "chai": "^4.2.0",
-    "mocha": "^6.1.4",
+    "mocha": "^7.1.2",
     "prettier": "^1.18.2",
     "rimraf": "^3.0.2",
     "service-worker-mock": "^2.0.3",
