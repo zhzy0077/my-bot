@@ -28,6 +28,7 @@ export async function handleRequest(request: Request): Promise<Response> {
   try {
     if (!precheckMessage(message, context)) {
       messageLog.status = MessageStatus.BLOCKED;
+      messageLog.resultMsg = "BLOCKED";
       return new Response(JSON.stringify(messageLog));
     }
     const result = await sendMessage(message, context);
@@ -61,10 +62,9 @@ async function readContext(): Promise<Context> {
   });
   const accessToken = (data.files as any)[AccessTokenFile];
   const logUrl = (data.files as any)[today()];
-  let logContent;
-  if (logUrl?.raw_url) {
-    logContent = await fetchTyped<MessageLog[]>(logUrl?.raw_url);
-  }
+  let logContent = logUrl?.raw_url
+    ? await fetchTyped<MessageLog[]>(logUrl?.raw_url)
+    : [];
   return <Context>{
     weChatAccessToken: JSON.parse(accessToken.content) as WeChatAccessToken,
     log: logContent
