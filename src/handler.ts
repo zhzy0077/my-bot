@@ -83,7 +83,7 @@ async function readContext(): Promise<Context> {
   });
   const accessToken = (data.files as any)[accessTokenFile];
   const logUrl = (data.files as any)[today()];
-  let logContent = logUrl?.raw_url
+  const logContent = logUrl?.raw_url
     ? await fetchTyped<MessageLog[]>(logUrl?.raw_url)
     : [];
   return <Context>{
@@ -129,7 +129,7 @@ function precheckMessage(message: Message, context: Context): void {
 
   // Step 2: check duplicate.
   const latest = context.log[context.log.length - 1];
-  if (now() - latest.timestamp < 60 && message.content === latest.message) {
+  if (latest && now() - latest.timestamp < 60 && message.content === latest.message) {
     throw <MessageBlocked>{
       reason: `A duplicate message found. The first one posted at ${latest.timestamp}.`
     };
