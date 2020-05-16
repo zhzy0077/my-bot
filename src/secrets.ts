@@ -4,5 +4,6 @@ export class Secrets {
   public static readonly GIST_TOKEN: string = "${GIST_TOKEN}";
   public static readonly GIST_ID: string = "${GIST_ID}";
   public static readonly IFTTT_KEY: string = "${IFTTT_KEY}";
-  public static readonly TELEGRAM_AUTHENTICATION_TOKEN: string = "${TELEGRAM_AUTHENTICATION_TOKEN}";
+  public static readonly TELEGRAM_AUTHENTICATION_TOKEN: string =
+    "${TELEGRAM_AUTHENTICATION_TOKEN}";
 }

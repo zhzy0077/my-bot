@@ -33,7 +33,12 @@ const channelSenderMap = {
   [MessageChannel.Email]: sendEmail
 };
 
-const blockList: string[] = ["【芽芽的窝】", "【欧莱雅男士】", "【自如网】"];
+const blockList: string[] = [
+  "【芽芽的窝】",
+  "【欧莱雅男士】",
+  "【自如网】",
+  "封新邮件"
+];
 
 export async function handleRequest(request: Request): Promise<Response> {
   if (request.method !== "POST") {
@@ -120,19 +125,27 @@ async function fetchAccessTokenFromOrigin(): Promise<WeChatAccessToken> {
 function precheckMessage(message: Message, context: Context): void {
   // Step 1: check block list.
   for (let word of blockList) {
-    if (message.content.indexOf(word) !== -1) {
+    if (
+      message.content.indexOf(word) !== -1 ||
+      message.title.indexOf(word) !== -1
+    ) {
       throw <MessageBlocked>{
-        reason: `Block ${word} matches.`
+        reason: `Block word: ${word} matches.`
       };
     }
   }
 
   // Step 2: check duplicate.
-  const latest = context.log[context.log.length - 1];
-  if (latest && now() - latest.timestamp < 60 && message.content === latest.message) {
-    throw <MessageBlocked>{
-      reason: `A duplicate message found. The first one posted at ${latest.timestamp}.`
-    };
+  for (let i = context.log.length - 1; i >= 0; i--) {
+    const log = context.log[i];
+    if (now() - log.timestamp > 3600) {
+      break;
+    }
+    if (message.content === log.message) {
+      throw <MessageBlocked>{
+        reason: `A duplicate message found. The first one posted at ${log.timestamp}.`
+      };
+    }
   }
 }
 
