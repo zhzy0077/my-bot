@@ -19,7 +19,7 @@ const replacements: [RegExp, string][] = [
   [/\./g, "\\."],
   [/!/g, "\\!"],
   [/_/g, "\\_"],
-  [/\./g, "\\."],
+  [/\./g, "\."],
 ];
 
 export function escape(input: string) {
